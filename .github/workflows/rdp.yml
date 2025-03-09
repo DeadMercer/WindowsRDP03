@@ -1,25 +1,20 @@
-name: Windows - RustDesk
+name: Windows RDP
 
-on:
-  workflow_dispatch:
+on: workflow_dispatch
 
 jobs:
   build:
-    name: Start Building...
     runs-on: windows-latest
-    timeout-minutes: 9999
-    
+
     steps:
-      - name: Downloading & Installing Essentials
+      - name: Enable RDP
         run: |
-          Invoke-WebRequest -Uri "https://www.dropbox.com/s/isewvhni5fwmkpc/Downloads.bat?st=15u1pmjg&dl=1" -OutFile "Downloads.bat"
-          cmd /c Downloads.bat
-      - name: Log In To AnyDesk
-        run: cmd /c show.bat
+          reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f
+          Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+          netsh advfirewall firewall set rule group="remote desktop" new enable=Yes
+          Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name fDenyTSConnections -Value 0
 
-      - name: Time Counter
-        run: python time.py
-
-      - name: Keep Session Active
+      - name: Get IP Address
         run: |
-          while ($true) { Start-Sleep -Seconds 3600 }
+          $ip = (Invoke-WebRequest -Uri "http://ifconfig.me/ip").Content
+          echo "Your Windows RDP IP: $ip"

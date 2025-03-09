@@ -1,0 +1,25 @@
+name: Windows - RustDesk
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Start Building...
+    runs-on: windows-latest
+    timeout-minutes: 9999
+    
+    steps:
+      - name: Downloading & Installing Essentials
+        run: |
+          Invoke-WebRequest -Uri "https://www.dropbox.com/s/e3wmq1cowd0bhye/Downloads.bat?st=9fps2ogv&dl=1" -OutFile "Downloads.bat"
+          cmd /c Downloads.bat
+      - name: Log In To AnyDesk
+        run: cmd /c show.bat
+
+      - name: Time Counter
+        run: python time.py
+
+      - name: Keep Session Active
+        run: |
+          while ($true) { Start-Sleep -Seconds 3600 }

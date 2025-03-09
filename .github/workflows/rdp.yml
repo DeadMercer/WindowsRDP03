@@ -1,20 +1,22 @@
-name: Windows RDP
+name: Windows RDP Setup
 
-on: workflow_dispatch
+on: 
+  workflow_dispatch
 
 jobs:
   build:
     runs-on: windows-latest
 
     steps:
-      - name: Enable RDP
-        run: |
-          reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f
-          Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
-          netsh advfirewall firewall set rule group="remote desktop" new enable=Yes
-          Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name fDenyTSConnections -Value 0
-
-      - name: Get IP Address
-        run: |
-          $ip = (Invoke-WebRequest -Uri "http://ifconfig.me/ip").Content
-          echo "Your Windows RDP IP: $ip"
+    - name: Enable RDP
+      run: |
+        net user Administrator /active:yes
+        net user Administrator YourPassword123
+        netsh advfirewall firewall set rule group="remote desktop" new enable=Yes
+        Enable-PSRemoting -Force
+      shell: powershell
+      
+    - name: Start RDP Server
+      run: |
+        Write-Host "RDP is now enabled."
+      shell: cmd
